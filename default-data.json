@@ -1,0 +1,85 @@
+{
+  "pillars": [
+    {
+      "id": 1,
+      "name": "Captação e Mapeamento",
+      "icon": "👤",
+      "macroStart": "",
+      "macroEnd": "",
+      "macroLabel": "Captação, status e rastreabilidade",
+      "items": [
+        { "t": "1.4 Acionamento em massa com critérios pré definidos", "s": "", "e": "", "status": "pendente", "detail": "", "detailUpdated": "", "detailUpdatedBy": "", "subitems": [] },
+        { "t": "1.2 Extração automática de status via IA sobre o WhatsApp/Digisac", "s": "", "e": "", "status": "pendente", "detail": "", "detailUpdated": "", "detailUpdatedBy": "", "subitems": [] },
+        { "t": "1.1 Mapa de disponibilidade em tempo real", "s": "", "e": "", "status": "pendente", "detail": "", "detailUpdated": "", "detailUpdatedBy": "", "subitems": [] },
+        { "t": "1.3 Captação direcionada para gargalos regionais", "s": "", "e": "", "status": "pendente", "detail": "", "detailUpdated": "", "detailUpdatedBy": "", "subitems": [] }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Integração de Dados / Matching",
+      "icon": "🗄️",
+      "macroStart": "",
+      "macroEnd": "",
+      "macroLabel": "Dados integrados e casados",
+      "items": [
+        { "t": "2.6 Inserção de cargas do Smart Cargas / Validar cargas que chegam por e-mail", "s": "", "e": "", "status": "pendente", "detail": "", "detailUpdated": "", "detailUpdatedBy": "", "subitems": [] },
+        { "t": "2.3 Categorização dos veículos", "s": "", "e": "", "status": "pendente", "detail": "", "detailUpdated": "", "detailUpdatedBy": "", "subitems": [] },
+        { "t": "2.2 Score de compatibilidade automático", "s": "", "e": "", "status": "pendente", "detail": "", "detailUpdated": "", "detailUpdatedBy": "", "subitems": [] },
+        { "t": "2.5 Follow em Cards (Aba Embarques) / Follow em planilha para Ambev", "s": "", "e": "", "status": "pendente", "detail": "", "detailUpdated": "", "detailUpdatedBy": "", "subitems": [] },
+        { "t": "2.1 Motor de matching preditivo", "s": "", "e": "", "status": "pendente", "detail": "", "detailUpdated": "", "detailUpdatedBy": "", "subitems": [] },
+        { "t": "2.4 Timeline preditiva de disponibilidade por veículo", "s": "", "e": "", "status": "pendente", "detail": "", "detailUpdated": "", "detailUpdatedBy": "", "subitems": [] }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Onboarding",
+      "icon": "📋",
+      "macroStart": "",
+      "macroEnd": "",
+      "macroLabel": "Cadastro e integrações onboard",
+      "items": [
+        { "t": "3.3 Validação de GR através da Fretbras", "s": "", "e": "", "status": "pendente", "detail": "", "detailUpdated": "", "detailUpdatedBy": "", "subitems": [] },
+        { "t": "3.2 Validação automática de documentos (COR)", "s": "", "e": "", "status": "pendente", "detail": "", "detailUpdated": "", "detailUpdatedBy": "", "subitems": [] },
+        { "t": "3.1 Checklist digital de onboarding", "s": "", "e": "", "status": "pendente", "detail": "", "detailUpdated": "", "detailUpdatedBy": "", "subitems": [] }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Execução Operacional",
+      "icon": "🚚",
+      "macroStart": "",
+      "macroEnd": "",
+      "macroLabel": "Execução operacional estruturada",
+      "items": [
+        { "t": "4.3 Painel de pendências críticas com ação rápida", "s": "", "e": "", "status": "pendente", "detail": "", "detailUpdated": "", "detailUpdatedBy": "", "subitems": [] },
+        { "t": "4.4 Seleção de dados da planilha para envio Ambev", "s": "", "e": "", "status": "pendente", "detail": "", "detailUpdated": "", "detailUpdatedBy": "", "subitems": [] },
+        { "t": "4.1 Automação de instruções e documentos de viagem", "s": "", "e": "", "status": "pendente", "detail": "", "detailUpdated": "", "detailUpdatedBy": "", "subitems": [] },
+        { "t": "4.2 Acompanhamento inteligente da viagem", "s": "", "e": "", "status": "pendente", "detail": "", "detailUpdated": "", "detailUpdatedBy": "", "subitems": [] }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Financeiro e Pós-Entrega",
+      "icon": "💲",
+      "macroStart": "",
+      "macroEnd": "",
+      "macroLabel": "Dados financeiros e pós-entrega consolidados",
+      "items": [
+        { "t": "5.1 Validação do canhoto do CT-e", "s": "", "e": "", "status": "pendente", "detail": "", "detailUpdated": "", "detailUpdatedBy": "", "subitems": [] },
+        { "t": "5.2 Redução de erros e retrabalho no fechamento financeiro", "s": "", "e": "", "status": "pendente", "detail": "", "detailUpdated": "", "detailUpdatedBy": "", "subitems": [] }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Dashboard Operacional",
+      "icon": "📊",
+      "macroStart": "",
+      "macroEnd": "",
+      "macroLabel": "Visão completa e inteligente da operação",
+      "items": [
+        { "t": "6.1 ETA preditivo por veículo", "s": "", "e": "", "status": "pendente", "detail": "", "detailUpdated": "", "detailUpdatedBy": "", "subitems": [] },
+        { "t": "6.2 Painel de matching automático", "s": "", "e": "", "status": "pendente", "detail": "", "detailUpdated": "", "detailUpdatedBy": "", "subitems": [] }
+      ]
+    }
+  ]
+}

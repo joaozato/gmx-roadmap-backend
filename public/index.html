@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jornada de IA — GMX Soluções em Transportes</title>
+<style>
+  :root{
+    --bg:#EEF1F6;
+    --panel:#FFFFFF;
+    --ink:#12203D;
+    --ink-soft:#5B6B85;
+    --line:#DCE2EC;
+    --p1:#2E6FDB; --p1-bg:#E7F0FE;
+    --p2:#238857; --p2-bg:#E6F5EC;
+    --p3:#D9711A; --p3-bg:#FDECDD;
+    --p4:#6E3FA3; --p4-bg:#F0E7FA;
+    --p5:#0E7E8F; --p5-bg:#E1F4F6;
+    --p6:#122A52; --p6-bg:#E7EBF2;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);}
+  .wrap{max-width:1320px;margin:0 auto;padding:28px 32px 60px;}
+  .top{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;margin-bottom:22px;}
+  .title h1{font-size:22px;margin:0 0 4px;letter-spacing:.2px;}
+  .title p{margin:0;color:var(--ink-soft);font-size:13.5px;}
+  .brand{font-weight:700;color:var(--p6);border:1.5px solid var(--p6);border-radius:8px;padding:6px 12px;font-size:13px;white-space:nowrap;}
+  .tabs{display:flex;gap:8px;margin-bottom:20px;}
+  .tab{border:1px solid var(--line);background:var(--panel);color:var(--ink-soft);padding:8px 16px;border-radius:8px;font-size:13.5px;cursor:pointer;font-weight:600;}
+  .tab.active{background:var(--p6);color:#fff;border-color:var(--p6);}
+  .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;}
+  .toolbar .status{font-size:12px;color:var(--ink-soft);}
+  .btn{border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:7px 13px;border-radius:7px;font-size:13px;cursor:pointer;font-weight:600;}
+  .btn:hover{border-color:var(--p6);}
+  .btn.small{padding:4px 9px;font-size:12px;font-weight:500;}
+  .btn.danger{color:#B4302C;}
+
+  .pillars{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;align-items:start;}
+  .col{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;min-height:100%;}
+  .col-head{padding:12px 12px 10px;border-bottom:2px solid var(--accent);}
+  .col-badge{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;font-size:12px;font-weight:700;margin-bottom:6px;}
+  .col-head h3{font-size:13.5px;margin:0 0 8px;line-height:1.25;}
+  .macro{background:var(--accent-bg);border-radius:8px;padding:7px 9px;font-size:11.5px;}
+  .macro-row{display:flex;gap:5px;margin-top:4px;}
+  .macro-row input{flex:1;font-size:11px;border:1px solid var(--line);border-radius:5px;padding:3px 5px;background:#fff;color:var(--ink);min-width:0;}
+  .macro label{color:var(--ink-soft);font-size:10.5px;display:block;margin-bottom:1px;}
+  .items{padding:10px 12px;display:flex;flex-direction:column;gap:8px;flex:1;}
+  .item{border:1px solid var(--line);border-radius:8px;padding:8px 9px;background:#FCFDFF;}
+  .item textarea{width:100%;border:none;resize:none;font-size:12.5px;font-family:inherit;color:var(--ink);background:transparent;padding:0;line-height:1.4;min-height:34px;}
+  .item textarea:focus{outline:none;}
+  .item-dates{display:flex;gap:5px;margin-top:6px;}
+  .item-dates input[type=date]{flex:1;font-size:10.5px;border:1px solid var(--line);border-radius:5px;padding:3px 4px;background:#fff;color:var(--ink-soft);min-width:0;}
+  .item-foot{display:flex;justify-content:space-between;align-items:center;margin-top:6px;}
+  select.status{font-size:10.5px;border:1px solid var(--line);border-radius:5px;padding:2px 4px;background:#fff;color:var(--ink-soft);}
+  .rm{border:none;background:none;color:#B4302C;cursor:pointer;font-size:11px;padding:2px 4px;}
+  .item-top{display:flex;justify-content:space-between;align-items:flex-start;gap:6px;}
+  .info-btn{flex-shrink:0;width:16px;height:16px;border-radius:50%;border:1px solid var(--accent);color:var(--accent);background:#fff;font-size:10px;font-weight:700;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;font-style:italic;font-family:Georgia,serif;}
+  .info-btn.has-note{background:var(--accent);color:#fff;}
+  .detail{display:none;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);}
+  .detail.open{display:block;}
+  .detail label{font-size:10px;color:var(--ink-soft);font-weight:600;display:block;margin-bottom:3px;}
+  .detail textarea{width:100%;min-height:56px;font-size:11.5px;font-family:inherit;border:1px solid var(--line);border-radius:6px;padding:5px 6px;color:var(--ink);background:#fff;resize:vertical;line-height:1.4;}
+  .detail .updated{font-size:9.5px;color:var(--ink-soft);margin-top:4px;text-align:right;}
+
+  .subitems{margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);display:flex;flex-direction:column;gap:4px;}
+  .sub{display:flex;align-items:flex-start;gap:6px;}
+  .sub input[type=checkbox]{margin-top:3px;flex-shrink:0;}
+  .sub input[type=text]{flex:1;font-size:11.5px;border:none;background:transparent;padding:2px 0;color:var(--ink);}
+  .sub input[type=text]:focus{outline:none;border-bottom:1px solid var(--accent);}
+  .sub.done input[type=text]{color:var(--ink-soft);text-decoration:line-through;}
+  .sub-rm{border:none;background:none;color:#B4302C;font-size:11px;cursor:pointer;padding:0 2px;flex-shrink:0;}
+  .add-sub{border:none;background:none;color:var(--ink-soft);font-size:11px;cursor:pointer;text-align:left;padding:2px 0;font-weight:600;}
+  .add-sub:hover{color:var(--accent);}
+  .add-item{margin:0 12px 12px;padding:7px;border:1.5px dashed var(--line);border-radius:8px;background:none;color:var(--ink-soft);font-size:12px;cursor:pointer;font-weight:600;}
+  .add-item:hover{border-color:var(--accent);color:var(--accent);}
+
+  .col[data-p="1"]{--accent:var(--p1);--accent-bg:var(--p1-bg);}
+  .col[data-p="2"]{--accent:var(--p2);--accent-bg:var(--p2-bg);}
+  .col[data-p="3"]{--accent:var(--p3);--accent-bg:var(--p3-bg);}
+  .col[data-p="4"]{--accent:var(--p4);--accent-bg:var(--p4-bg);}
+  .col[data-p="5"]{--accent:var(--p5);--accent-bg:var(--p5-bg);}
+  .col[data-p="6"]{--accent:var(--p6);--accent-bg:var(--p6-bg);}
+
+  .tl-wrap{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;overflow-x:auto;}
+  .tl-scale{position:relative;height:26px;margin-left:210px;border-bottom:1px solid var(--line);margin-bottom:6px;min-width:640px;}
+  .tl-scale span{position:absolute;top:0;font-size:10.5px;color:var(--ink-soft);transform:translateX(-50%);}
+  .tl-row{display:flex;align-items:center;min-height:46px;border-top:1px solid #F0F2F6;min-width:850px;}
+  .tl-row:first-of-type{border-top:none;}
+  .tl-label{width:210px;flex-shrink:0;font-size:12.5px;font-weight:600;padding-right:14px;display:flex;align-items:center;gap:8px;}
+  .tl-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+  .tl-track{position:relative;flex:1;height:24px;min-width:640px;}
+  .tl-bar{position:absolute;top:4px;height:16px;border-radius:5px;font-size:10.5px;color:#fff;display:flex;align-items:center;padding:0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .tl-empty{font-size:11px;color:var(--ink-soft);padding-left:4px;}
+  .tl-today{position:absolute;top:0;bottom:0;width:1px;background:#B4302C;}
+  .tl-today-label{position:absolute;top:-18px;font-size:9.5px;color:#B4302C;transform:translateX(-50%);font-weight:600;}
+
+  .legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:16px;font-size:11.5px;color:var(--ink-soft);}
+  .legend span{display:inline-flex;align-items:center;gap:5px;}
+  .legend i{width:9px;height:9px;border-radius:50%;display:inline-block;}
+
+  .name-overlay{position:fixed;inset:0;background:rgba(18,32,61,0.55);display:flex;align-items:center;justify-content:center;z-index:50;}
+  .name-box{background:#fff;border-radius:12px;padding:22px 24px;width:280px;text-align:center;}
+  .name-box h4{margin:0 0 6px;font-size:15px;}
+  .name-box p{margin:0 0 12px;font-size:12px;color:var(--ink-soft);}
+  .name-box input{width:100%;font-size:13px;border:1px solid var(--line);border-radius:7px;padding:8px 9px;margin-bottom:10px;}
+  .name-box button{width:100%;background:var(--p6);color:#fff;border:none;border-radius:7px;padding:8px;font-size:13px;font-weight:600;cursor:pointer;}
+  .whoami{font-size:11.5px;color:var(--ink-soft);cursor:pointer;text-decoration:underline;}
+
+  @media(max-width:1100px){.pillars{grid-template-columns:repeat(3,1fr);}}
+  @media(max-width:640px){.pillars{grid-template-columns:1fr;} .wrap{padding:18px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div class="title">
+      <h1>Jornada de IA — GMX Soluções em Transportes</h1>
+      <p>Visão integrada dos 6 pilares, entregas macro e linha do tempo do projeto</p>
+    </div>
+    <div class="brand">GMX</div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-view="pillars">Pilares</button>
+    <button class="tab" data-view="timeline">Linha do tempo</button>
+  </div>
+
+  <div class="toolbar">
+    <div class="status"><span id="status">Carregando...</span> · <span class="whoami" id="whoami"></span></div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn small" id="exportBtn">Exportar JSON</button>
+      <button class="btn small danger" id="resetBtn">Restaurar padrão</button>
+    </div>
+  </div>
+
+  <div id="view-pillars" class="pillars"></div>
+
+  <div id="view-timeline" class="tl-wrap" style="display:none;">
+    <div class="tl-scale" id="tlScale"></div>
+    <div id="tlRows"></div>
+    <div class="legend" id="tlLegend"></div>
+  </div>
+
+  <div class="name-overlay" id="nameOverlay" style="display:none;">
+    <div class="name-box">
+      <h4>Quem está editando?</h4>
+      <p>Seu nome aparece nas atualizações de cada item.</p>
+      <input type="text" id="nameInput" placeholder="Seu nome" maxlength="40">
+      <button id="nameSubmit">Entrar</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const API = "/api/data";
+const NAME_KEY = "gmx_user_name";
+let currentUser = "";
+let data = null;
+let saveTimer = null;
+let pollTimer = null;
+let lastKnownUpdatedAt = null;
+
+const COLORS = {1:"#2E6FDB",2:"#238857",3:"#D9711A",4:"#6E3FA3",5:"#0E7E8F",6:"#122A52"};
+
+async function fetchData(){
+  const res = await fetch(API);
+  if(!res.ok) throw new Error("falha ao carregar dados");
+  return res.json();
+}
+
+async function pushData(){
+  const statusEl = document.getElementById("status");
+  statusEl.textContent = "Salvando...";
+  try{
+    const res = await fetch(API, {
+      method: "PUT",
+      headers: {"Content-Type":"application/json", "X-User-Name": currentUser || "anonimo"},
+      body: JSON.stringify({ pillars: data.pillars, __user: currentUser })
+    });
+    if(!res.ok) throw new Error("erro ao salvar");
+    const json = await res.json();
+    lastKnownUpdatedAt = json.updated_at;
+    statusEl.textContent = "Alterações salvas · visível para todos com acesso a este link";
+  }catch(e){
+    statusEl.textContent = "Não foi possível salvar (verifique a conexão)";
+  }
+}
+
+function queueSave(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(pushData, 500);
+}
+
+function ensureUserName(){
+  const saved = localStorage.getItem(NAME_KEY);
+  if(saved){ currentUser = saved; updateWhoami(); return Promise.resolve(); }
+  return new Promise(resolve=>{
+    const overlay = document.getElementById("nameOverlay");
+    const input = document.getElementById("nameInput");
+    const btn = document.getElementById("nameSubmit");
+    overlay.style.display = "flex";
+    input.focus();
+    function submit(){
+      const val = input.value.trim();
+      if(!val) return;
+      currentUser = val;
+      localStorage.setItem(NAME_KEY, val);
+      updateWhoami();
+      overlay.style.display = "none";
+      resolve();
+    }
+    btn.addEventListener("click", submit);
+    input.addEventListener("keydown", e=>{ if(e.key==="Enter") submit(); });
+  });
+}
+
+function updateWhoami(){
+  const el = document.getElementById("whoami");
+  if(el) el.innerHTML = `editando como <strong>${escapeHTML(currentUser)}</strong> (<span id="changeNameLink" style="cursor:pointer;text-decoration:underline;">trocar</span>)`;
+  const link = document.getElementById("changeNameLink");
+  if(link) link.addEventListener("click", ()=>{
+    const val = prompt("Seu nome:", currentUser);
+    if(val && val.trim()){
+      currentUser = val.trim();
+      localStorage.setItem(NAME_KEY, currentUser);
+      updateWhoami();
+    }
+  });
+}
+
+function fmtShort(iso){
+  if(!iso) return "";
+  const [y,m,d] = iso.split("-");
+  return `${d}/${m}/${y.slice(2)}`;
+}
+function escapeHTML(str){
+  return (str||"").replace(/[&<>]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+}
+function escapeAttr(str){
+  return (str||"").replace(/"/g,"&quot;");
+}
+
+function renderPillars(){
+  const root = document.getElementById("view-pillars");
+  root.innerHTML = "";
+  data.pillars.forEach(p=>{
+    const col = document.createElement("div");
+    col.className = "col";
+    col.dataset.p = p.id;
+
+    col.innerHTML = `
+      <div class="col-head">
+        <div class="col-badge">${p.id}</div>
+        <h3>${p.icon} ${p.name}</h3>
+        <div class="macro">
+          <label style="font-weight:600;color:var(--accent);">Entrega macro</label>
+          <input type="text" data-field="macroLabel" value="${escapeAttr(p.macroLabel)}" style="width:100%;font-size:11.5px;border:1px solid var(--line);border-radius:5px;padding:3px 5px;margin-top:2px;background:#fff;">
+          <div class="macro-row">
+            <div style="flex:1;"><label>Início</label><input type="date" data-field="macroStart" value="${p.macroStart}"></div>
+            <div style="flex:1;"><label>Entrega</label><input type="date" data-field="macroEnd" value="${p.macroEnd}"></div>
+          </div>
+        </div>
+      </div>
+      <div class="items"></div>
+      <button class="add-item">+ adicionar item micro</button>
+    `;
+
+    const itemsWrap = col.querySelector(".items");
+    p.items.forEach((it, idx)=>{
+      const row = document.createElement("div");
+      row.className = "item";
+      const hasNote = !!it.detail;
+      row.innerHTML = `
+        <div class="item-top">
+          <textarea data-idx="${idx}" data-field="t" style="flex:1;">${escapeHTML(it.t)}</textarea>
+          <button class="info-btn ${hasNote?"has-note":""}" data-idx="${idx}" title="Detalhamento e dificuldades">i</button>
+        </div>
+        <div class="item-dates">
+          <input type="date" data-idx="${idx}" data-field="s" value="${it.s}" title="Início">
+          <input type="date" data-idx="${idx}" data-field="e" value="${it.e}" title="Entrega">
+        </div>
+        <div class="item-foot">
+          <select class="status" data-idx="${idx}" data-field="status">
+            <option value="pendente" ${it.status==="pendente"?"selected":""}>Pendente</option>
+            <option value="em_andamento" ${it.status==="em_andamento"?"selected":""}>Em andamento</option>
+            <option value="concluido" ${it.status==="concluido"?"selected":""}>Concluído</option>
+          </select>
+          <button class="rm" data-idx="${idx}">remover</button>
+        </div>
+        <div class="subitems" data-idx="${idx}">
+          ${it.subitems.map((sub,si)=>`
+            <div class="sub ${sub.done?"done":""}">
+              <input type="checkbox" data-idx="${idx}" data-si="${si}" data-field="sub-done" ${sub.done?"checked":""}>
+              <input type="text" data-idx="${idx}" data-si="${si}" data-field="sub-t" value="${escapeAttr(sub.t)}">
+              <button class="sub-rm" data-idx="${idx}" data-si="${si}">×</button>
+            </div>
+          `).join("")}
+          <button class="add-sub" data-idx="${idx}">+ subitem</button>
+        </div>
+        <div class="detail" data-idx="${idx}">
+          <label>Dificuldades, problemas e observações</label>
+          <textarea data-idx="${idx}" data-field="detail" placeholder="Descreva aqui o que travou, decisões tomadas, próximos passos...">${escapeHTML(it.detail)}</textarea>
+          <div class="updated" data-idx="${idx}">${it.detailUpdated ? "Atualizado por "+escapeHTML(it.detailUpdatedBy||"—")+" em "+fmtShort(it.detailUpdated) : "Ainda sem atualização"}</div>
+        </div>
+      `;
+      itemsWrap.appendChild(row);
+    });
+
+    col.querySelectorAll('[data-field="macroLabel"],[data-field="macroStart"],[data-field="macroEnd"]').forEach(inp=>{
+      inp.addEventListener("input", ()=>{
+        p[inp.dataset.field] = inp.value;
+        queueSave();
+        if(document.getElementById("view-timeline").style.display !== "none") renderTimeline();
+      });
+    });
+
+    itemsWrap.querySelectorAll("textarea, input[type=date], select").forEach(inp=>{
+      inp.addEventListener("input", ()=>{
+        const idx = +inp.dataset.idx;
+        p.items[idx][inp.dataset.field] = inp.value;
+        if(inp.dataset.field === "detail"){
+          const today = new Date().toISOString().slice(0,10);
+          p.items[idx].detailUpdated = today;
+          p.items[idx].detailUpdatedBy = currentUser;
+          const upd = itemsWrap.querySelector(`.updated[data-idx="${idx}"]`);
+          if(upd) upd.textContent = "Atualizado por " + (currentUser||"—") + " em " + fmtShort(today);
+          const btn = itemsWrap.querySelector(`.info-btn[data-idx="${idx}"]`);
+          if(btn) btn.classList.toggle("has-note", !!inp.value);
+        }
+        queueSave();
+      });
+    });
+
+    itemsWrap.querySelectorAll(".info-btn").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const idx = btn.dataset.idx;
+        const panel = itemsWrap.querySelector(`.detail[data-idx="${idx}"]`);
+        if(panel) panel.classList.toggle("open");
+      });
+    });
+
+    itemsWrap.querySelectorAll('[data-field="sub-done"]').forEach(cb=>{
+      cb.addEventListener("change", ()=>{
+        const idx = +cb.dataset.idx, si = +cb.dataset.si;
+        p.items[idx].subitems[si].done = cb.checked;
+        queueSave();
+        cb.closest(".sub").classList.toggle("done", cb.checked);
+      });
+    });
+
+    itemsWrap.querySelectorAll('[data-field="sub-t"]').forEach(inp=>{
+      inp.addEventListener("input", ()=>{
+        const idx = +inp.dataset.idx, si = +inp.dataset.si;
+        p.items[idx].subitems[si].t = inp.value;
+        queueSave();
+      });
+    });
+
+    itemsWrap.querySelectorAll(".sub-rm").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const idx = +btn.dataset.idx, si = +btn.dataset.si;
+        p.items[idx].subitems.splice(si,1);
+        queueSave();
+        renderPillars();
+      });
+    });
+
+    itemsWrap.querySelectorAll(".add-sub").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const idx = +btn.dataset.idx;
+        p.items[idx].subitems.push({t:"Novo subitem", done:false});
+        queueSave();
+        renderPillars();
+      });
+    });
+
+    itemsWrap.querySelectorAll(".rm").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const idx = +btn.dataset.idx;
+        p.items.splice(idx,1);
+        queueSave();
+        renderPillars();
+      });
+    });
+
+    col.querySelector(".add-item").addEventListener("click", ()=>{
+      p.items.push({t:"Novo item", s:"", e:"", status:"pendente", detail:"", detailUpdated:"", detailUpdatedBy:"", subitems:[]});
+      queueSave();
+      renderPillars();
+    });
+
+    root.appendChild(col);
+  });
+}
+
+function renderTimeline(){
+  const scaleEl = document.getElementById("tlScale");
+  const rowsEl = document.getElementById("tlRows");
+  const legendEl = document.getElementById("tlLegend");
+  scaleEl.innerHTML = "";
+  rowsEl.innerHTML = "";
+  legendEl.innerHTML = "";
+
+  let allDates = [];
+  data.pillars.forEach(p=>{
+    if(p.macroStart) allDates.push(new Date(p.macroStart));
+    if(p.macroEnd) allDates.push(new Date(p.macroEnd));
+    p.items.forEach(it=>{
+      if(it.s) allDates.push(new Date(it.s));
+      if(it.e) allDates.push(new Date(it.e));
+    });
+  });
+
+  const today = new Date();
+  if(allDates.length === 0){
+    rowsEl.innerHTML = '<div class="tl-empty" style="padding:20px;">Adicione datas nos pilares para visualizar a linha do tempo.</div>';
+    return;
+  }
+
+  let minD = new Date(Math.min(...allDates, today));
+  let maxD = new Date(Math.max(...allDates, today));
+  minD.setDate(minD.getDate() - 5);
+  maxD.setDate(maxD.getDate() + 5);
+  const totalMs = maxD - minD;
+
+  function pct(d){ return ((new Date(d) - minD) / totalMs) * 100; }
+
+  let cursor = new Date(minD.getFullYear(), minD.getMonth(), 1);
+  while(cursor <= maxD){
+    const p = pct(cursor);
+    if(p >= 0 && p <= 100){
+      const tick = document.createElement("span");
+      tick.style.left = p + "%";
+      tick.textContent = cursor.toLocaleDateString("pt-BR",{month:"short",year:"2-digit"});
+      scaleEl.appendChild(tick);
+    }
+    cursor.setMonth(cursor.getMonth()+1);
+  }
+
+  data.pillars.forEach(p=>{
+    const row = document.createElement("div");
+    row.className = "tl-row";
+    const color = COLORS[p.id];
+    let barHTML = "";
+    if(p.macroStart && p.macroEnd){
+      const left = pct(p.macroStart);
+      const width = Math.max(pct(p.macroEnd) - left, 1.2);
+      barHTML = `<div class="tl-bar" style="left:${left}%;width:${width}%;background:${color};" title="${escapeAttr(p.macroLabel)}: ${fmtShort(p.macroStart)} – ${fmtShort(p.macroEnd)}">${escapeHTML(p.macroLabel)}</div>`;
+    } else {
+      barHTML = `<div class="tl-empty">sem datas definidas</div>`;
+    }
+    const todayPct = pct(today);
+    row.innerHTML = `
+      <div class="tl-label"><span class="tl-dot" style="background:${color};"></span>${p.id}. ${p.name}</div>
+      <div class="tl-track">
+        ${barHTML}
+        ${todayPct>=0 && todayPct<=100 ? `<div class="tl-today" style="left:${todayPct}%;"></div>` : ""}
+      </div>
+    `;
+    rowsEl.appendChild(row);
+  });
+
+  const todayPct = pct(today);
+  if(todayPct>=0 && todayPct<=100){
+    const lbl = document.createElement("div");
+    lbl.style.position="relative";
+    lbl.innerHTML = `<span class="tl-today-label" style="left:calc(210px + ${todayPct}%);position:absolute;">hoje</span>`;
+    rowsEl.prepend(lbl);
+  }
+
+  data.pillars.forEach(p=>{
+    const s = document.createElement("span");
+    s.innerHTML = `<i style="background:${COLORS[p.id]}"></i>${p.id}. ${p.name}`;
+    legendEl.appendChild(s);
+  });
+}
+
+function switchView(view){
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active", t.dataset.view===view));
+  document.getElementById("view-pillars").style.display = view==="pillars" ? "grid" : "none";
+  document.getElementById("view-timeline").style.display = view==="timeline" ? "block" : "none";
+  if(view==="timeline") renderTimeline();
+}
+
+document.querySelectorAll(".tab").forEach(t=>{
+  t.addEventListener("click", ()=>switchView(t.dataset.view));
+});
+
+document.getElementById("exportBtn").addEventListener("click", ()=>{
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "jornada-ia-gmx.json";
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById("resetBtn").addEventListener("click", async ()=>{
+  if(!confirm("Isso vai apagar todas as datas e alterações e restaurar o conteúdo original para todos. Continuar?")) return;
+  const res = await fetch("/api/default-data");
+  const fresh = await res.json();
+  data = fresh;
+  queueSave();
+  renderPillars();
+  if(document.getElementById("view-timeline").style.display !== "none") renderTimeline();
+});
+
+async function pollForUpdates(){
+  try{
+    const fresh = await fetchData();
+    if(fresh.updated_at !== lastKnownUpdatedAt && document.activeElement.tagName !== "TEXTAREA" && document.activeElement.tagName !== "INPUT"){
+      data = fresh.payload;
+      lastKnownUpdatedAt = fresh.updated_at;
+      renderPillars();
+      if(document.getElementById("view-timeline").style.display !== "none") renderTimeline();
+    }
+  }catch(e){}
+}
+
+(async function init(){
+  await ensureUserName();
+  const state = await fetchData();
+  data = state.payload;
+  lastKnownUpdatedAt = state.updated_at;
+  document.getElementById("status").textContent = "Alterações salvas · visível para todos com acesso a este link";
+  renderPillars();
+  pollTimer = setInterval(pollForUpdates, 8000);
+})();
+</script>
+</body>
+</html>
