@@ -1,0 +1,7 @@
+{
+  "pillars": [
+    { "id": 1, "name": "GMXINHO", "sub": "Scraper de dados e automação", "icon": "🤖", "macroStart": "", "macroEnd": "", "macroLabel": "Entrega macro do projeto", "items": [] },
+    { "id": 2, "name": "Redes Sociais & Site", "sub": "Presença digital e marketing", "icon": "🌐", "macroStart": "", "macroEnd": "", "macroLabel": "Entrega macro do projeto", "items": [] },
+    { "id": 3, "name": "Intranet", "sub": "Sistema interno GMX", "icon": "🗂️", "macroStart": "", "macroEnd": "", "macroLabel": "Entrega macro do projeto", "items": [] }
+  ]
+}
