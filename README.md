@@ -1,6 +1,6 @@
 # GMX — Jornada de IA (backend)
 
-Backend simples em Node.js + Express + SQLite para o roadmap interativo
+Backend simples em Node.js + Express + PostgreSQL para o roadmap interativo
 "Jornada de IA — GMX Soluções em Transportes". Guarda os pilares, itens,
 subitens e detalhamentos num banco de dados de verdade (não depende mais
 do navegador de cada pessoa), com um pequeno log de quem alterou o quê.
@@ -12,18 +12,20 @@ depois.
 
 ## Rodando localmente
 
-Requer Node.js 18 ou mais recente.
+Requer Node.js 18 ou mais recente e um banco Postgres (local ou o mesmo
+do Supabase usado em produção).
 
 ```bash
 cd gmx-roadmap-backend
 npm install
+export DATABASE_URL="postgresql://usuario:senha@host:porta/postgres"
 npm start
 ```
 
 Acesse http://localhost:3000
 
-O banco de dados fica salvo em `data.db` (SQLite), criado automaticamente
-na primeira execução com o conteúdo padrão dos 6 pilares.
+O schema (tabelas `state` e `audit_log`) é criado automaticamente na
+primeira execução, com o conteúdo padrão dos 6 pilares.
 
 ## Estrutura
 
@@ -32,7 +34,6 @@ gmx-roadmap-backend/
   server.js          -> servidor Express + rotas da API
   default-data.json  -> conteúdo inicial (6 pilares, itens)
   public/index.html  -> frontend (interface que os usuários acessam)
-  data.db             -> banco SQLite (criado automaticamente, não subir pro git)
 ```
 
 ## API
@@ -43,28 +44,33 @@ gmx-roadmap-backend/
 - `GET  /api/activity` — últimas 30 alterações registradas
 - `GET  /api/health` — checagem simples de que o servidor está no ar
 
-## Deploy simples (Railway)
+## Deploy 100% gratuito (Supabase + Render)
 
-1. Crie uma conta em https://railway.app (dá para entrar com GitHub)
-2. Suba esta pasta para um repositório no GitHub (ou use `railway up` direto do terminal, sem precisar de GitHub)
-3. No Railway: **New Project → Deploy from GitHub repo** (ou `railway init` + `railway up` no terminal, dentro desta pasta)
-4. O Railway detecta o `package.json` e roda `npm install` + `npm start` automaticamente
-5. Em **Settings → Networking**, gere um domínio público (algo como `gmx-roadmap.up.railway.app`)
-6. Pronto — esse link é o que você compartilha com os gestores
+Banco de dados no **Supabase** (Postgres gratuito, persistente) e a
+aplicação no **Render.com** (Web Service gratuito).
 
-Alternativas equivalentes: **Render.com** (Web Service, mesmas etapas) ou
-**Fly.io**. Qualquer uma dessas hospeda o Node.js e mantém o `data.db`
-persistente entre reinícios (no Railway/Render, ative um "volume" para
-garantir que o banco não seja apagado a cada deploy).
+### 1. Banco (Supabase)
 
-## Deploy com Claude Code
+1. Crie uma conta em https://supabase.com e um novo projeto
+2. Em **Project → Connect**, copie a connection string da aba
+   **Transaction pooler** (porta 6543) — o endpoint direto (porta 5432)
+   exige IPv6 e costuma falhar em hosts free tier
+3. Substitua `[YOUR-PASSWORD]` pela senha do banco definida na criação
+   do projeto. Se a senha tiver caracteres especiais (`@`, `#`, etc.),
+   codifique-os em URL (ex: `@` vira `%40`)
 
-Se preferir que o Claude Code cuide de tudo (instalar dependências,
-testar localmente, criar o repositório, conectar com o Railway e gerar
-o link final), basta abrir esta pasta no Claude Code e pedir:
+### 2. Aplicação (Render)
 
-> "Instale as dependências, teste o servidor localmente e me ajude a
-> publicar no Railway."
+1. Suba esta pasta para um repositório no GitHub
+2. Em https://render.com: **New → Web Service**, conecte o repositório
+3. Configure:
+   - Build Command: `npm install`
+   - Start Command: `npm start`
+4. Em **Environment**, adicione a variável `DATABASE_URL` com a connection
+   string do Supabase (passo anterior)
+5. Deploy. O Render gera um domínio público (algo como
+   `gmx-roadmap.onrender.com`) — esse link é o que você compartilha
 
-Ele consegue rodar os comandos de terminal necessários e te guiar (ou
-executar) cada etapa do deploy.
+Detalhe do plano gratuito do Render: o serviço "dorme" após ~15 minutos
+sem acesso e demora cerca de 30s para acordar na próxima visita. Os dados
+continuam seguros porque ficam no Supabase, não na instância do Render.
