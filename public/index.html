@@ -108,73 +108,38 @@
 
   @media(max-width:1100px){.pillars{grid-template-columns:repeat(3,1fr);}}
   @media(max-width:640px){.pillars{grid-template-columns:1fr;} .wrap{padding:18px;}}
-
-  .main-tabs{margin-bottom:18px;border-bottom:1px solid var(--line);padding-bottom:18px;}
-  .main-tabs .tab{padding:9px 18px;font-size:14px;}
-  .pillars.pillars-3{grid-template-columns:repeat(3,1fr);}
-  @media(max-width:900px){.pillars.pillars-3{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
 <div class="wrap">
 
   <div class="top">
-    <div class="title" id="mainTitle">
+    <div class="title">
       <h1>Jornada de IA — GMX Soluções em Transportes</h1>
       <p>Visão integrada dos 6 pilares, entregas macro e linha do tempo do projeto</p>
     </div>
     <div class="brand">GMX</div>
   </div>
 
-  <div class="tabs main-tabs">
-    <button class="tab active" data-main="ia">Jornada de IA</button>
-    <button class="tab" data-main="projetos">Roadmap de Projetos</button>
+  <div class="tabs">
+    <button class="tab active" data-view="pillars">Pilares</button>
+    <button class="tab" data-view="timeline">Linha do tempo</button>
   </div>
 
-  <div id="section-ia">
-    <div class="tabs">
-      <button class="tab active" data-view="pillars">Pilares</button>
-      <button class="tab" data-view="timeline">Linha do tempo</button>
-    </div>
-
-    <div class="toolbar">
-      <div class="status"><span id="status">Carregando...</span> · <span class="whoami" id="whoami"></span></div>
-      <div style="display:flex;gap:8px;">
-        <button class="btn small" id="exportBtn">Exportar JSON</button>
-        <button class="btn small danger" id="resetBtn">Restaurar padrão</button>
-      </div>
-    </div>
-
-    <div id="view-pillars" class="pillars"></div>
-
-    <div id="view-timeline" class="tl-wrap" style="display:none;">
-      <div class="tl-scale" id="tlScale"></div>
-      <div id="tlRows"></div>
-      <div class="legend" id="tlLegend"></div>
+  <div class="toolbar">
+    <div class="status"><span id="status">Carregando...</span> · <span class="whoami" id="whoami"></span></div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn small" id="exportBtn">Exportar JSON</button>
+      <button class="btn small danger" id="resetBtn">Restaurar padrão</button>
     </div>
   </div>
 
-  <div id="section-projetos" style="display:none;">
-    <div class="tabs">
-      <button class="tab active" data-pview="pillars">Projetos</button>
-      <button class="tab" data-pview="timeline">Linha do tempo</button>
-    </div>
+  <div id="view-pillars" class="pillars"></div>
 
-    <div class="toolbar">
-      <div class="status"><span id="pStatus">Carregando...</span> · <span class="whoami" id="pWhoami"></span></div>
-      <div style="display:flex;gap:8px;">
-        <button class="btn small" id="pExportBtn">Exportar JSON</button>
-        <button class="btn small danger" id="pResetBtn">Restaurar padrão</button>
-      </div>
-    </div>
-
-    <div id="pview-pillars" class="pillars pillars-3"></div>
-
-    <div id="pview-timeline" class="tl-wrap" style="display:none;">
-      <div class="tl-scale" id="pTlScale"></div>
-      <div id="pTlRows"></div>
-      <div class="legend" id="pTlLegend"></div>
-    </div>
+  <div id="view-timeline" class="tl-wrap" style="display:none;">
+    <div class="tl-scale" id="tlScale"></div>
+    <div id="tlRows"></div>
+    <div class="legend" id="tlLegend"></div>
   </div>
 
   <div class="name-overlay" id="nameOverlay" style="display:none;">
@@ -513,32 +478,14 @@ function renderTimeline(){
 }
 
 function switchView(view){
-  document.querySelectorAll('.tab[data-view]').forEach(t=>t.classList.toggle("active", t.dataset.view===view));
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active", t.dataset.view===view));
   document.getElementById("view-pillars").style.display = view==="pillars" ? "grid" : "none";
   document.getElementById("view-timeline").style.display = view==="timeline" ? "block" : "none";
   if(view==="timeline") renderTimeline();
 }
 
-document.querySelectorAll('.tab[data-view]').forEach(t=>{
+document.querySelectorAll(".tab").forEach(t=>{
   t.addEventListener("click", ()=>switchView(t.dataset.view));
-});
-
-function switchMain(main){
-  document.querySelectorAll('.tab[data-main]').forEach(t=>t.classList.toggle("active", t.dataset.main===main));
-  document.getElementById("section-ia").style.display = main==="ia" ? "" : "none";
-  document.getElementById("section-projetos").style.display = main==="projetos" ? "" : "none";
-  const title = document.getElementById("mainTitle");
-  if(main==="ia"){
-    title.innerHTML = "<h1>Jornada de IA — GMX Soluções em Transportes</h1><p>Visão integrada dos 6 pilares, entregas macro e linha do tempo do projeto</p>";
-  } else {
-    title.innerHTML = "<h1>Roadmap de Projetos — GMX</h1><p>GMXINHO (scraper), Redes Sociais &amp; Site e Intranet — visão geral e linha do tempo</p>";
-    initProjetos();
-    if(document.getElementById("pview-timeline").style.display !== "none") renderProjTimeline();
-  }
-}
-
-document.querySelectorAll('.tab[data-main]').forEach(t=>{
-  t.addEventListener("click", ()=>switchMain(t.dataset.main));
 });
 
 document.getElementById("exportBtn").addEventListener("click", ()=>{
@@ -582,358 +529,6 @@ async function pollForUpdates(){
   renderPillars();
   pollTimer = setInterval(pollForUpdates, 8000);
 })();
-
-// ---------------------------------------------------------------------
-// Roadmap de Projetos — estado, render e polling totalmente independentes
-// da Jornada de IA acima. Não compartilha `data`, timers nem funções de
-// render; só reaproveita os helpers genéricos (escapeHTML, fmtShort) e o
-// nome do usuário (ensureUserName/currentUser).
-// ---------------------------------------------------------------------
-const API_PROJ = "/api/projetos";
-const PROJ_COLORS = {1:"#2E6FDB",2:"#238857",3:"#D9711A"};
-let projData = null;
-let projSaveTimer = null;
-let projPollTimer = null;
-let projLastKnownUpdatedAt = null;
-let projInitialized = false;
-
-async function fetchProjData(){
-  const res = await fetch(API_PROJ);
-  if(!res.ok) throw new Error("falha ao carregar dados de projetos");
-  return res.json();
-}
-
-async function pushProjData(){
-  const statusEl = document.getElementById("pStatus");
-  statusEl.textContent = "Salvando...";
-  try{
-    const res = await fetch(API_PROJ, {
-      method: "PUT",
-      headers: {"Content-Type":"application/json", "X-User-Name": currentUser || "anonimo"},
-      body: JSON.stringify({ pillars: projData.pillars, __user: currentUser })
-    });
-    if(!res.ok) throw new Error("erro ao salvar");
-    const json = await res.json();
-    projLastKnownUpdatedAt = json.updated_at;
-    statusEl.textContent = "Alterações salvas · visível para todos com acesso a este link";
-  }catch(e){
-    statusEl.textContent = "Não foi possível salvar (verifique a conexão)";
-  }
-}
-
-function queueProjSave(){
-  clearTimeout(projSaveTimer);
-  projSaveTimer = setTimeout(pushProjData, 500);
-}
-
-function updateProjWhoami(){
-  const el = document.getElementById("pWhoami");
-  if(el) el.innerHTML = `editando como <strong>${escapeHTML(currentUser)}</strong> (<span id="pChangeNameLink" style="cursor:pointer;text-decoration:underline;">trocar</span>)`;
-  const link = document.getElementById("pChangeNameLink");
-  if(link) link.addEventListener("click", ()=>{
-    const val = prompt("Seu nome:", currentUser);
-    if(val && val.trim()){
-      currentUser = val.trim();
-      localStorage.setItem(NAME_KEY, currentUser);
-      updateWhoami();
-      updateProjWhoami();
-    }
-  });
-}
-
-function renderProjPillars(){
-  const root = document.getElementById("pview-pillars");
-  root.innerHTML = "";
-  projData.pillars.forEach(p=>{
-    const col = document.createElement("div");
-    col.className = "col";
-    col.dataset.p = p.id;
-
-    col.innerHTML = `
-      <div class="col-head">
-        <div class="col-badge">${p.id}</div>
-        <h3>${p.icon} ${p.name}</h3>
-        <div class="sub" style="font-size:11.5px;color:var(--ink-soft);margin-bottom:8px;">${p.sub||""}</div>
-        <div class="macro">
-          <label style="font-weight:600;color:var(--accent);">Entrega macro</label>
-          <input type="text" data-field="macroLabel" value="${escapeAttr(p.macroLabel)}" style="width:100%;font-size:11.5px;border:1px solid var(--line);border-radius:5px;padding:3px 5px;margin-top:2px;background:#fff;">
-          <div class="macro-row">
-            <div style="flex:1;min-width:0;"><label>Início</label><input type="date" data-field="macroStart" value="${p.macroStart}"></div>
-            <div style="flex:1;min-width:0;"><label>Entrega</label><input type="date" data-field="macroEnd" value="${p.macroEnd}"></div>
-          </div>
-        </div>
-      </div>
-      <div class="items"></div>
-      <button class="add-item">+ adicionar item</button>
-    `;
-
-    const itemsWrap = col.querySelector(".items");
-    if(p.items.length === 0){
-      itemsWrap.innerHTML = `<div style="font-size:11.5px;color:var(--ink-soft);text-align:center;padding:10px 4px;font-style:italic;">Nenhum item ainda — clique em "+ adicionar item" abaixo</div>`;
-    }
-    p.items.forEach((it, idx)=>{
-      const row = document.createElement("div");
-      row.className = "item";
-      const hasNote = !!it.detail;
-      row.innerHTML = `
-        <div class="item-top">
-          <textarea data-idx="${idx}" data-field="t" style="flex:1;min-width:0;" placeholder="Descreva o item...">${escapeHTML(it.t)}</textarea>
-          <button class="info-btn ${hasNote?"has-note":""}" data-idx="${idx}" title="Detalhamento e dificuldades">i</button>
-        </div>
-        <div class="item-dates">
-          <input type="date" data-idx="${idx}" data-field="s" value="${it.s}" title="Início">
-          <input type="date" data-idx="${idx}" data-field="e" value="${it.e}" title="Entrega">
-        </div>
-        <div class="item-foot">
-          <select class="status" data-idx="${idx}" data-field="status">
-            <option value="pendente" ${it.status==="pendente"?"selected":""}>Pendente</option>
-            <option value="em_andamento" ${it.status==="em_andamento"?"selected":""}>Em andamento</option>
-            <option value="concluido" ${it.status==="concluido"?"selected":""}>Concluído</option>
-          </select>
-          <button class="rm" data-idx="${idx}">remover</button>
-        </div>
-        <div class="subitems" data-idx="${idx}">
-          ${it.subitems.map((sub,si)=>`
-            <div class="sub ${sub.done?"done":""}">
-              <input type="checkbox" data-idx="${idx}" data-si="${si}" data-field="sub-done" ${sub.done?"checked":""}>
-              <input type="text" data-idx="${idx}" data-si="${si}" data-field="sub-t" value="${escapeAttr(sub.t)}">
-              <button class="sub-rm" data-idx="${idx}" data-si="${si}">×</button>
-            </div>
-          `).join("")}
-          <button class="add-sub" data-idx="${idx}">+ subitem</button>
-        </div>
-        <div class="detail" data-idx="${idx}">
-          <label>Dificuldades, problemas e observações</label>
-          <textarea data-idx="${idx}" data-field="detail" placeholder="Descreva aqui o que travou, decisões tomadas, próximos passos...">${escapeHTML(it.detail)}</textarea>
-          <div class="updated" data-idx="${idx}">${it.detailUpdated ? "Atualizado por "+escapeHTML(it.detailUpdatedBy||"—")+" em "+fmtShort(it.detailUpdated) : "Ainda sem atualização"}</div>
-        </div>
-      `;
-      itemsWrap.appendChild(row);
-    });
-
-    col.querySelectorAll('[data-field="macroLabel"],[data-field="macroStart"],[data-field="macroEnd"]').forEach(inp=>{
-      inp.addEventListener("input", ()=>{
-        p[inp.dataset.field] = inp.value;
-        queueProjSave();
-        if(document.getElementById("pview-timeline").style.display !== "none") renderProjTimeline();
-      });
-    });
-
-    itemsWrap.querySelectorAll("textarea, input[type=date], select").forEach(inp=>{
-      inp.addEventListener("input", ()=>{
-        const idx = +inp.dataset.idx;
-        p.items[idx][inp.dataset.field] = inp.value;
-        if(inp.dataset.field === "detail"){
-          const today = new Date().toISOString().slice(0,10);
-          p.items[idx].detailUpdated = today;
-          p.items[idx].detailUpdatedBy = currentUser;
-          const upd = itemsWrap.querySelector(`.updated[data-idx="${idx}"]`);
-          if(upd) upd.textContent = "Atualizado por " + (currentUser||"—") + " em " + fmtShort(today);
-          const btn = itemsWrap.querySelector(`.info-btn[data-idx="${idx}"]`);
-          if(btn) btn.classList.toggle("has-note", !!inp.value);
-        }
-        queueProjSave();
-      });
-    });
-
-    itemsWrap.querySelectorAll(".info-btn").forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        const idx = btn.dataset.idx;
-        const panel = itemsWrap.querySelector(`.detail[data-idx="${idx}"]`);
-        if(panel) panel.classList.toggle("open");
-      });
-    });
-
-    itemsWrap.querySelectorAll('[data-field="sub-done"]').forEach(cb=>{
-      cb.addEventListener("change", ()=>{
-        const idx = +cb.dataset.idx, si = +cb.dataset.si;
-        p.items[idx].subitems[si].done = cb.checked;
-        queueProjSave();
-        cb.closest(".sub").classList.toggle("done", cb.checked);
-      });
-    });
-
-    itemsWrap.querySelectorAll('[data-field="sub-t"]').forEach(inp=>{
-      inp.addEventListener("input", ()=>{
-        const idx = +inp.dataset.idx, si = +inp.dataset.si;
-        p.items[idx].subitems[si].t = inp.value;
-        queueProjSave();
-      });
-    });
-
-    itemsWrap.querySelectorAll(".sub-rm").forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        const idx = +btn.dataset.idx, si = +btn.dataset.si;
-        p.items[idx].subitems.splice(si,1);
-        queueProjSave();
-        renderProjPillars();
-      });
-    });
-
-    itemsWrap.querySelectorAll(".add-sub").forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        const idx = +btn.dataset.idx;
-        p.items[idx].subitems.push({t:"Novo subitem", done:false});
-        queueProjSave();
-        renderProjPillars();
-      });
-    });
-
-    itemsWrap.querySelectorAll(".rm").forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        const idx = +btn.dataset.idx;
-        p.items.splice(idx,1);
-        queueProjSave();
-        renderProjPillars();
-      });
-    });
-
-    col.querySelector(".add-item").addEventListener("click", ()=>{
-      p.items.push({t:"Novo item", s:"", e:"", status:"pendente", detail:"", detailUpdated:"", detailUpdatedBy:"", subitems:[]});
-      queueProjSave();
-      renderProjPillars();
-    });
-
-    root.appendChild(col);
-  });
-}
-
-function renderProjTimeline(){
-  const scaleEl = document.getElementById("pTlScale");
-  const rowsEl = document.getElementById("pTlRows");
-  const legendEl = document.getElementById("pTlLegend");
-  scaleEl.innerHTML = "";
-  rowsEl.innerHTML = "";
-  legendEl.innerHTML = "";
-
-  let allDates = [];
-  projData.pillars.forEach(p=>{
-    if(p.macroStart) allDates.push(new Date(p.macroStart));
-    if(p.macroEnd) allDates.push(new Date(p.macroEnd));
-    p.items.forEach(it=>{
-      if(it.s) allDates.push(new Date(it.s));
-      if(it.e) allDates.push(new Date(it.e));
-    });
-  });
-
-  const today = new Date();
-  if(allDates.length === 0){
-    rowsEl.innerHTML = '<div class="tl-empty" style="padding:20px;">Adicione datas nos projetos para visualizar a linha do tempo.</div>';
-    return;
-  }
-
-  let minD = new Date(Math.min(...allDates, today));
-  let maxD = new Date(Math.max(...allDates, today));
-  minD.setDate(minD.getDate() - 5);
-  maxD.setDate(maxD.getDate() + 5);
-  const totalMs = maxD - minD;
-
-  function pct(d){ return ((new Date(d) - minD) / totalMs) * 100; }
-
-  let cursor = new Date(minD.getFullYear(), minD.getMonth(), 1);
-  while(cursor <= maxD){
-    const p = pct(cursor);
-    if(p >= 0 && p <= 100){
-      const tick = document.createElement("span");
-      tick.style.left = p + "%";
-      tick.textContent = cursor.toLocaleDateString("pt-BR",{month:"short",year:"2-digit"});
-      scaleEl.appendChild(tick);
-    }
-    cursor.setMonth(cursor.getMonth()+1);
-  }
-
-  projData.pillars.forEach(p=>{
-    const row = document.createElement("div");
-    row.className = "tl-row";
-    const color = PROJ_COLORS[p.id];
-    let barHTML = "";
-    if(p.macroStart && p.macroEnd){
-      const left = pct(p.macroStart);
-      const width = Math.max(pct(p.macroEnd) - left, 1.2);
-      barHTML = `<div class="tl-bar" style="left:${left}%;width:${width}%;background:${color};" title="${escapeAttr(p.macroLabel)}: ${fmtShort(p.macroStart)} – ${fmtShort(p.macroEnd)}">${escapeHTML(p.macroLabel)}</div>`;
-    } else {
-      barHTML = `<div class="tl-empty">sem datas definidas</div>`;
-    }
-    const todayPct = pct(today);
-    row.innerHTML = `
-      <div class="tl-label"><span class="tl-dot" style="background:${color};"></span>${p.id}. ${p.name}</div>
-      <div class="tl-track">
-        ${barHTML}
-        ${todayPct>=0 && todayPct<=100 ? `<div class="tl-today" style="left:${todayPct}%;"></div>` : ""}
-      </div>
-    `;
-    rowsEl.appendChild(row);
-  });
-
-  const todayPct = pct(today);
-  if(todayPct>=0 && todayPct<=100){
-    const lbl = document.createElement("div");
-    lbl.style.position="relative";
-    lbl.innerHTML = `<span class="tl-today-label" style="left:calc(210px + ${todayPct}%);position:absolute;">hoje</span>`;
-    rowsEl.prepend(lbl);
-  }
-
-  projData.pillars.forEach(p=>{
-    const s = document.createElement("span");
-    s.innerHTML = `<i style="background:${PROJ_COLORS[p.id]}"></i>${p.id}. ${p.name}`;
-    legendEl.appendChild(s);
-  });
-}
-
-function switchProjView(view){
-  document.querySelectorAll('.tab[data-pview]').forEach(t=>t.classList.toggle("active", t.dataset.pview===view));
-  document.getElementById("pview-pillars").style.display = view==="pillars" ? "grid" : "none";
-  document.getElementById("pview-timeline").style.display = view==="timeline" ? "block" : "none";
-  if(view==="timeline") renderProjTimeline();
-}
-
-document.querySelectorAll('.tab[data-pview]').forEach(t=>{
-  t.addEventListener("click", ()=>switchProjView(t.dataset.pview));
-});
-
-document.getElementById("pExportBtn").addEventListener("click", ()=>{
-  const blob = new Blob([JSON.stringify(projData, null, 2)], {type:"application/json"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "roadmap-projetos-gmx.json";
-  a.click();
-  URL.revokeObjectURL(url);
-});
-
-document.getElementById("pResetBtn").addEventListener("click", async ()=>{
-  if(!confirm("Isso vai apagar todos os itens e datas cadastrados no roadmap de projetos e restaurar os 3 projetos vazios para todos. Continuar?")) return;
-  const res = await fetch("/api/projetos/default-data");
-  const fresh = await res.json();
-  projData = fresh;
-  queueProjSave();
-  renderProjPillars();
-  if(document.getElementById("pview-timeline").style.display !== "none") renderProjTimeline();
-});
-
-async function pollForProjUpdates(){
-  try{
-    const fresh = await fetchProjData();
-    if(fresh.updated_at !== projLastKnownUpdatedAt && document.activeElement.tagName !== "TEXTAREA" && document.activeElement.tagName !== "INPUT"){
-      projData = fresh.payload;
-      projLastKnownUpdatedAt = fresh.updated_at;
-      renderProjPillars();
-      if(document.getElementById("pview-timeline").style.display !== "none") renderProjTimeline();
-    }
-  }catch(e){}
-}
-
-async function initProjetos(){
-  if(projInitialized) return;
-  projInitialized = true;
-  updateProjWhoami();
-  const state = await fetchProjData();
-  projData = state.payload;
-  projLastKnownUpdatedAt = state.updated_at;
-  document.getElementById("pStatus").textContent = "Alterações salvas · visível para todos com acesso a este link";
-  renderProjPillars();
-  projPollTimer = setInterval(pollForProjUpdates, 8000);
-}
 </script>
 </body>
 </html>

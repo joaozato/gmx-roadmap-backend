@@ -22,15 +22,11 @@ const pool = new Pool({
 });
 
 const DEFAULT_DATA = require("./default-data.json");
-const DEFAULT_DATA_PROJETOS = require("./default-data-projetos.json");
-
-const BOARD_IA = 1;
-const BOARD_PROJETOS = 2;
 
 async function ensureSchema() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS state (
-      id INTEGER PRIMARY KEY,
+      id INTEGER PRIMARY KEY CHECK (id = 1),
       payload JSONB NOT NULL,
       updated_at TIMESTAMPTZ NOT NULL,
       updated_by TEXT
@@ -44,41 +40,40 @@ async function ensureSchema() {
   `);
 }
 
-async function getState(boardId, defaultData) {
+async function getState() {
   const { rows } = await pool.query(
-    "SELECT payload, updated_at, updated_by FROM state WHERE id = $1",
-    [boardId]
+    "SELECT payload, updated_at, updated_by FROM state WHERE id = 1"
   );
   if (rows.length === 0) {
     const now = new Date().toISOString();
     await pool.query(
-      "INSERT INTO state (id, payload, updated_at, updated_by) VALUES ($1, $2, $3, $4)",
-      [boardId, defaultData, now, "sistema"]
+      "INSERT INTO state (id, payload, updated_at, updated_by) VALUES (1, $1, $2, $3)",
+      [DEFAULT_DATA, now, "sistema"]
     );
-    return { payload: defaultData, updated_at: now, updated_by: "sistema" };
+    return { payload: DEFAULT_DATA, updated_at: now, updated_by: "sistema" };
   }
   const row = rows[0];
   return { payload: row.payload, updated_at: row.updated_at, updated_by: row.updated_by };
 }
 
-async function setState(boardId, payload, userName, summary) {
+async function setState(payload, userName) {
   const now = new Date().toISOString();
   await pool.query(
-    "INSERT INTO state (id, payload, updated_at, updated_by) VALUES ($1, $2, $3, $4) " +
+    "INSERT INTO state (id, payload, updated_at, updated_by) VALUES (1, $1, $2, $3) " +
     "ON CONFLICT(id) DO UPDATE SET payload = excluded.payload, updated_at = excluded.updated_at, updated_by = excluded.updated_by",
-    [boardId, payload, now, userName || "anonimo"]
+    [payload, now, userName || "anonimo"]
   );
   await pool.query(
     "INSERT INTO audit_log (user_name, summary, created_at) VALUES ($1, $2, $3)",
-    [userName || "anonimo", summary, now]
+    [userName || "anonimo", "atualizacao do roadmap", now]
   );
   return now;
 }
 
-// GET current state (Jornada de IA)
+// GET current state
 app.get("/api/data", async (req, res) => {
   try {
-    const state = await getState(BOARD_IA, DEFAULT_DATA);
+    const state = await getState();
     res.json(state);
   } catch (err) {
     console.error(err);
@@ -86,7 +81,7 @@ app.get("/api/data", async (req, res) => {
   }
 });
 
-// PUT replaces the entire roadmap state (Jornada de IA)
+// PUT replaces the entire roadmap state
 app.put("/api/data", async (req, res) => {
   const body = req.body;
   const userName = (req.body && req.body.__user) || req.header("x-user-name") || "anonimo";
@@ -95,35 +90,7 @@ app.put("/api/data", async (req, res) => {
   }
   const cleanPayload = { pillars: body.pillars };
   try {
-    const updatedAt = await setState(BOARD_IA, cleanPayload, userName, "atualizacao da jornada de IA");
-    res.json({ ok: true, updated_at: updatedAt, updated_by: userName });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "erro ao salvar estado" });
-  }
-});
-
-// GET current state (Roadmap de Projetos)
-app.get("/api/projetos", async (req, res) => {
-  try {
-    const state = await getState(BOARD_PROJETOS, DEFAULT_DATA_PROJETOS);
-    res.json(state);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "erro ao ler estado" });
-  }
-});
-
-// PUT replaces the entire roadmap state (Roadmap de Projetos)
-app.put("/api/projetos", async (req, res) => {
-  const body = req.body;
-  const userName = (req.body && req.body.__user) || req.header("x-user-name") || "anonimo";
-  if (!body || !Array.isArray(body.pillars)) {
-    return res.status(400).json({ error: "payload invalido: esperado objeto com 'pillars'" });
-  }
-  const cleanPayload = { pillars: body.pillars };
-  try {
-    const updatedAt = await setState(BOARD_PROJETOS, cleanPayload, userName, "atualizacao do roadmap de projetos");
+    const updatedAt = await setState(cleanPayload, userName);
     res.json({ ok: true, updated_at: updatedAt, updated_by: userName });
   } catch (err) {
     console.error(err);
@@ -147,10 +114,6 @@ app.get("/api/activity", async (req, res) => {
 // Returns the original default content, without touching the saved state
 app.get("/api/default-data", (req, res) => {
   res.json(DEFAULT_DATA);
-});
-
-app.get("/api/projetos/default-data", (req, res) => {
-  res.json(DEFAULT_DATA_PROJETOS);
 });
 
 app.get("/api/health", (req, res) => {
